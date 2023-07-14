@@ -19,6 +19,28 @@ The project is organized into several directories:
 
 To get started with the project, clone the repository and navigate to the desired service:
 
-```bash
-git clone https://github.com/username/repo.git
-cd repo/services/url_collector
+`git clone https://github.com/vp-82/cloud-native-scraper.git`
+`cd repo/services/url_collector`
+
+For detailed instructions on how to run and deploy each service, see the README files in the respective service directories.
+
+## Testing
+
+Each service directory contains a `tests` folder with tests for that service. For instructions on how to run these tests, see the README files in the respective service directories.
+
+## Linting and Formatting
+
+We use flake8 for Python linting, and golangci-lint for Go. Formatting rules are defined in the `.formatter.cfg` files in each service directory. Check these files for the specific rules we follow.
+
+## Deploying
+
+We use GitHub Actions for CI/CD. Workflows are defined under the `.github/workflows` directory. These workflows automatically test, build, and deploy our services whenever changes are pushed to the repository.
+
+## Contributing
+
+If you wish to contribute to the project, please see the `CONTRIBUTING.md` file for guidelines.
+
+## License
+
+This project is licensed under the MIT License.
+
