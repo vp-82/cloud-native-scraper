@@ -64,12 +64,12 @@ else
 fi
 
 printf "${BOLD}Running pytest on /tests folders...\n${NC}"
-flake8_result=$(pytest ${PROJECT_DIR}/tests/${MODULE})
+pytest_result=$(pytest ${PROJECT_DIR}/tests/${MODULE})
 if [[ $? -eq 0 ]]; then
-    printf "${GREEN}flake8 check passed.\n${NC}"
+    printf "${GREEN}pytest check passed.\n${NC}"
 else
-    printf "${RED}flake8 check failed. See output:\n${NC}"
-    echo "${flake8_result}"
+    printf "${RED}pytest check failed. See output:\n${NC}"
+    echo "${pytest_result}"
 fi
 
 # printf "${BOLD}Checking if GOOGLE_APPLICATION_CREDENTIALS is set and points to a json file...\n${NC}"

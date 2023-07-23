@@ -11,4 +11,4 @@ def test_constructor():
     """
     Test the constructor of the SimpleUrlCollector class.
     """
-    _ = SimpleURLCollector()
+    _ = SimpleURLCollector(urls=['https://www.google.com/'])

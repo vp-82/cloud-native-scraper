@@ -7,6 +7,9 @@ from abc import ABC, abstractmethod
 class BaseURLCollector(ABC):
     """ Base URL Collector"""
 
+    def __init__(self, urls):
+        self.urls = urls
+
     @abstractmethod
     def collect(self):
         """ Collects the base URLs from the given source. """
