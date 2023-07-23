@@ -3,6 +3,7 @@ Simple URL collector.
 """
 
 import logging
+from typing import List
 
 import requests
 from base_url_collector import BaseURLCollector
@@ -13,10 +14,10 @@ class SimpleURLCollector(BaseURLCollector):
     """
     Simple URL collector.
     """
-    def __init__(self, urls):
+    def __init__(self, urls: List[str]):
         super().__init__(urls)
         self.logger = logging.getLogger(__name__)
-        self.state = []
+        self.state = {}
 
     def load_state(self):
         """ Loads the state of the collector. """
@@ -24,7 +25,7 @@ class SimpleURLCollector(BaseURLCollector):
     def save_state(self):
         """ Saves the state of the collector. """
 
-    def collect(self):
+    def collect(self) -> List[str]:
         """ Collects the base URLs from the given source. """
         all_urls = []
         for base_url in self.urls:
@@ -46,7 +47,7 @@ class SimpleURLCollector(BaseURLCollector):
 
         return all_urls
 
-    def extract_urls(self, soup):
+    def extract_urls(self, soup: BeautifulSoup) -> List[str]:
         """ Extracts URLs from the given soup. """
         urls = []
         for link in soup.find_all('a'):
