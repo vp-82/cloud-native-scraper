@@ -1,4 +1,6 @@
-"""Tests for the BaseUrlCollector class."""
+"""
+Tests for the BaseUrlCollector class.
+"""
 
 import pytest
 

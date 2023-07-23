@@ -22,4 +22,7 @@
         "-s",
         "${workspaceFolder}/tests/url_collector",
     ],
+    "files.exclude": {
+        "**/.git": false
+   },
 }
