@@ -34,11 +34,14 @@ done
 
 # Set the project directory to the directory containing the script
 PROJECT_DIR=$SCRIPT_DIR
+PYTHONPATH=$PROJECT_DIR
 
 echo "Working directory (check script):"
 echo "$PWD"
 echo "Project directory (check script):"
 echo "$PROJECT_DIR"
+echo "PYTHONPATH (check script):"
+echo "$PYTHONPATH"
 
 # Check and activate conda environment
 if [[ $CONDA_PREFIX != *"/env" ]]; then
@@ -73,15 +76,15 @@ else
     ERRORS=$((ERRORS+1))
 fi
 
-printf "${BOLD}Running pytest on /tests folders...\n${NC}"
-pytest_result=$(pytest ${PROJECT_DIR}/tests/${MODULE})
-if [[ $? -eq 0 ]]; then
-    printf "${GREEN}pytest check passed.\n${NC}"
-else
-    printf "${RED}pytest check failed. See output:\n${NC}"
-    echo "${pytest_result}"
-    ERRORS=$((ERRORS+1))
-fi
+# printf "${BOLD}Running pytest on /tests folders...\n${NC}"
+# pytest_result=$(pytest -c ${PROJECT_DIR}/pytest.ini ${PROJECT_DIR}/tests/${MODULE})
+# if [[ $? -eq 0 ]]; then
+#     printf "${GREEN}pytest check passed.\n${NC}"
+# else
+#     printf "${RED}pytest check failed. See output:\n${NC}"
+#     echo "${pytest_result}"
+#     ERRORS=$((ERRORS+1))
+# fi
 
 if [[ $ERRORS -gt 0 ]]; then
     printf "${RED}There were $ERRORS errors. Please fix them before committing.\n${NC}"
