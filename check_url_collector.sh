@@ -16,6 +16,9 @@ RED='\033[1;31m'
 BOLD='\033[1m'
 NC='\033[0m' # No Color
 
+# Set error handling
+ERRORS=0
+
 # Parse command-line options
 while getopts "v" opt; do
   case ${opt} in
@@ -31,6 +34,11 @@ done
 
 # Set the project directory to the directory containing the script
 PROJECT_DIR=$SCRIPT_DIR
+
+echo "Working directory (check script):"
+echo "$PWD"
+echo "Project directory (check script):"
+echo "$PROJECT_DIR"
 
 # Check and activate conda environment
 if [[ $CONDA_PREFIX != *"/env" ]]; then
@@ -52,6 +60,7 @@ if [[ $? -eq 0 ]]; then
 else
     printf "${RED}Pylint check failed. See output:\n${NC}"
     echo "${pylint_result}"
+    ERRORS=$((ERRORS+1))
 fi
 
 printf "${BOLD}Running flake8 on /src and /tests folders...\n${NC}"
@@ -61,6 +70,7 @@ if [[ $? -eq 0 ]]; then
 else
     printf "${RED}flake8 check failed. See output:\n${NC}"
     echo "${flake8_result}"
+    ERRORS=$((ERRORS+1))
 fi
 
 printf "${BOLD}Running pytest on /tests folders...\n${NC}"
@@ -70,6 +80,14 @@ if [[ $? -eq 0 ]]; then
 else
     printf "${RED}pytest check failed. See output:\n${NC}"
     echo "${pytest_result}"
+    ERRORS=$((ERRORS+1))
+fi
+
+if [[ $ERRORS -gt 0 ]]; then
+    printf "${RED}There were $ERRORS errors. Please fix them before committing.\n${NC}"
+    exit 1
+else
+    printf "${GREEN}All checks passed.\n${NC}"
 fi
 
 # printf "${BOLD}Checking if GOOGLE_APPLICATION_CREDENTIALS is set and points to a json file...\n${NC}"
