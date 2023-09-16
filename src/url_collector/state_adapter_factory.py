@@ -1,8 +1,7 @@
 """ Factory for creating state adapters."""
 
-from firestore_state_adapter import FirestoreStateAdapter
-from gcp_state_adapter import GCPStateAdapter
-from local_state_adapter import LocalFileStateAdapter
+from state_adapter import (FirestoreStateAdapter, GCPStateAdapter,
+                           LocalFileStateAdapter)
 
 
 class StateAdapterFactory:

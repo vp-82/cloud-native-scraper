@@ -23,7 +23,7 @@ def test_constructor():
     """
     Test the constructor of the SimpleUrlCollector class.
     """
-    _ = SimpleURLCollector(urls=[BASE_URL])
+    _ = SimpleURLCollector(base_urls=[BASE_URL], start_urls=[START_URL])
 
 
 @patch('src.url_collector.simple_url_collector.requests.get')
@@ -31,7 +31,7 @@ def test_collect(base_url_response):
     """ Test the collect method of the SimpleUrlCollector class. """
     with patch('src.url_collector.simple_url_collector.requests.get') as mock_get:
         mock_get.return_value = base_url_response
-        collector = SimpleURLCollector(urls=[BASE_URL])
+        collector = SimpleURLCollector(base_urls=[BASE_URL], start_urls=[START_URL])
         urls = collector.collect()
         assert len(urls) == 1
         assert urls[0] == START_URL

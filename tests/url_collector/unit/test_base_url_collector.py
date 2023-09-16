@@ -13,4 +13,7 @@ def test_constructor():
     """
     with pytest.raises(TypeError):
 
-        _ = BaseURLCollector(urls=['https://google.com'])  # type: ignore # pylint: disable=abstract-class-instantiated
+        _ = BaseURLCollector(  # type: ignore # pylint: disable=abstract-class-instantiated
+            base_urls=['https://google.com'],
+            start_urls=['https://google.com/test']
+            )
