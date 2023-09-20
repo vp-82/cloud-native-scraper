@@ -88,3 +88,5 @@ def test_collect_with_exception_and_state():
     assert data['pending_urls'] == []
     assert data['errors'] == ["HTTP Exception"]
     assert data['visited_urls'] == []
+
+    os.remove('tests/url_collector/unit/state.json')
