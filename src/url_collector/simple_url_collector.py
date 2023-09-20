@@ -18,8 +18,7 @@ class SimpleURLCollector(BaseURLCollector):
     """
     def __init__(self, base_urls: List[str],
                  start_urls: List[str],
-                 state_adapter: AbstractStateAdapter,
-                 batch_size: int = 10):
+                 state_adapter: AbstractStateAdapter):
         super().__init__(base_urls=base_urls, start_urls=start_urls)
         self.logger = logging.getLogger(__name__)
         self.state_adapter = state_adapter
@@ -73,7 +72,7 @@ class SimpleURLCollector(BaseURLCollector):
                     # Filter URLs to only include those that start with the base_url
                     urls_from_page = [url for url in urls_from_page if any(
                         url.startswith(base_url) for base_url in self.base_urls)]
-                    
+
                     # Add URLs from the page to the pending list if they haven't been visited
                     for url in urls_from_page:
                         if url not in self.visited_urls:
@@ -111,4 +110,3 @@ class SimpleURLCollector(BaseURLCollector):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.save_state()
-        pass
