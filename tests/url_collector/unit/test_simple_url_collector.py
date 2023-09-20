@@ -39,5 +39,5 @@ def test_collect():
 
         collector = SimpleURLCollector(base_urls=[BASE_URL], start_urls=[START_URL], state_adapter=mock_state_adapter)
         urls = collector.collect()
-        assert len(urls) == 98
+        assert len(urls) == 5390
         # assert urls[0] == START_URL

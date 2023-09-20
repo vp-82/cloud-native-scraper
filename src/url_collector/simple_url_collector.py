@@ -2,6 +2,7 @@
 Simple URL collector.
 """
 import logging
+from collections import deque
 from typing import List
 from urllib.parse import urljoin
 
@@ -22,8 +23,9 @@ class SimpleURLCollector(BaseURLCollector):
         super().__init__(base_urls=base_urls, start_urls=start_urls)
         self.logger = logging.getLogger(__name__)
         self.state_adapter = state_adapter
-        self.batch_size = batch_size
-        self.current_batch_count = 0
+        self.visited_urls = set()
+        self.pending_urls = []
+        self.errors = []
         # Load the state on initialization
         self.state = self.load_state() or {}
 
@@ -32,33 +34,62 @@ class SimpleURLCollector(BaseURLCollector):
 
     def save_state(self):
         """ Saves the state of the collector. """
+        state = {
+            'pending_urls': list(self.pending_urls),  # Convert deque to list for serialization
+            'errors': self.errors,
+            'visited_urls': list(self.visited_urls)  # Convert set to list for serialization
+        }
+        self.state_adapter.save_state(state)
+        self.logger.info(f"State saved with current state: {self.state}")
 
     def collect(self) -> List[str]:
         """ Collects the base URLs from the given source. """
         all_urls = []
+        pending_urls = deque(self.start_urls)  # Use a queue to manage pending URLs
 
-        for start_url in self.start_urls:
-            response = requests.get(start_url, timeout=20)
-            soup = BeautifulSoup(response.text, 'html.parser')
+        try:
+            while pending_urls:  # Continue scraping as long as there are pending URLs
 
-            # Determine the corresponding base_url for the start_url
-            corresponding_base_url = None
-            for base_url in self.base_urls:
-                if start_url.startswith(base_url):
-                    corresponding_base_url = base_url
-                    break
+                start_url = pending_urls.popleft()  # Get the next URL to scrape
 
-            # If a corresponding base URL is found, extract URLs
-            if corresponding_base_url:
-                urls_from_page = self.extract_urls(soup, corresponding_base_url)
+                # Skip if the URL has already been visited
+                if start_url in self.visited_urls:
+                    continue
 
-                # Filter URLs to only include those that start with the base_url
-                urls_from_page = [url for url in urls_from_page if any(
-                    url.startswith(base_url) for base_url in self.base_urls)]
+                response = requests.get(start_url, timeout=20)
+                soup = BeautifulSoup(response.text, 'html.parser')
 
-                all_urls.extend(urls_from_page)
-                self.save_state()
+                # Determine the corresponding base_url for the start_url
+                corresponding_base_url = None
+                for base_url in self.base_urls:
+                    if start_url.startswith(base_url):
+                        corresponding_base_url = base_url
+                        break
 
+                # If a corresponding base URL is found, extract URLs
+                if corresponding_base_url:
+                    urls_from_page = self.extract_urls(soup, corresponding_base_url)
+
+                    # Filter URLs to only include those that start with the base_url
+                    urls_from_page = [url for url in urls_from_page if any(
+                        url.startswith(base_url) for base_url in self.base_urls)]
+                    
+                    # Add URLs from the page to the pending list if they haven't been visited
+                    for url in urls_from_page:
+                        if url not in self.visited_urls:
+                            pending_urls.append(url)
+
+                    all_urls.extend(urls_from_page)
+
+                # Add the start_url to the visited_urls set
+                self.visited_urls.add(start_url)
+
+        except Exception as ex:
+            # If an error occurs, save the current state
+            self.logger.error(f"Error occurred during scraping: {ex}")
+            self.errors.append(ex)
+            self.save_state()
+            raise  # Re-raise the exception after saving the state
         return all_urls
 
     def extract_urls(self, soup: BeautifulSoup, base_url: str) -> List[str]:
@@ -74,3 +105,10 @@ class SimpleURLCollector(BaseURLCollector):
             absolute_url = urljoin(base_url, href)
             urls.append(absolute_url)
         return urls
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.save_state()
+        pass

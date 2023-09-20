@@ -57,7 +57,7 @@ else
 fi
 
 printf "${BOLD}Running pylint on /src and /tests folders...\n${NC}"
-pylint_result=$(pylint ${PROJECT_DIR}/src/${MODULE} ${PROJECT_DIR}/tests/${MODULE})
+pylint_result=$(pylint --rcfile=.pylintrc ${PROJECT_DIR}/src/${MODULE} ${PROJECT_DIR}/tests/${MODULE})
 if [[ $? -eq 0 ]]; then
     printf "${GREEN}Pylint check passed.\n${NC}"
 else
