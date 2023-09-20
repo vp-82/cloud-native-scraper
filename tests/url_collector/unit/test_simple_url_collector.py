@@ -41,3 +41,19 @@ def test_collect():
         urls = collector.collect()
         assert len(urls) == 5390
         # assert urls[0] == START_URL
+
+def test_collect_with_exception():
+    """ Test the collect method of the SimpleUrlCollector class when an exception occurs. """
+    with patch('src.url_collector.simple_url_collector.requests.get',
+                side_effect=Exception("HTTP Exception")) as _:  # Mock the requests.get method
+
+        # Mock the state adapter
+        mock_state_adapter = Mock(spec=AbstractStateAdapter)
+        mock_state_adapter.save_state.return_value = None  # Mocked save_state to do nothing
+
+        collector = SimpleURLCollector(base_urls=[BASE_URL], start_urls=[START_URL], state_adapter=mock_state_adapter)
+        with pytest.raises(Exception):
+            _ = collector.collect()
+        
+        assert mock_state_adapter.save_state.call_count == 1
+
