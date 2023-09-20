@@ -36,7 +36,7 @@ class SimpleURLCollector(BaseURLCollector):
         state = {
             'pending_urls': list(self.pending_urls),  # Convert deque to list for serialization
             'errors': self.errors,
-            'visited_urls': list(self.visited_urls)  # Convert set to list for serialization
+            'visited_urls': list(self.visited_urls),  # Convert set to list for serialization
         }
         self.state_adapter.save_state(state)
         self.logger.info(f"State saved with current state: {self.state}")
@@ -86,7 +86,7 @@ class SimpleURLCollector(BaseURLCollector):
         except Exception as ex:
             # If an error occurs, save the current state
             self.logger.error(f"Error occurred during scraping: {ex}")
-            self.errors.append(ex)
+            self.errors.append(str(ex))
             self.save_state()
             raise  # Re-raise the exception after saving the state
         return all_urls
