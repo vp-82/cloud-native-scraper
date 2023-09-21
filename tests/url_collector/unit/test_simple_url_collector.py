@@ -8,10 +8,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 from html_responses import BASEURL_RESPONSE
-
-from src.url_collector.simple_url_collector import SimpleURLCollector
-from src.url_collector.state_adapter import AbstractStateAdapter
-from src.url_collector.state_adapter_factory import StateAdapterFactory
+from simple_url_collector import SimpleURLCollector
+from state_adapter import AbstractStateAdapter
+from state_adapter_factory import StateAdapterFactory
 
 BASE_URL = "https://www.dwd.de/"
 START_URL = "https://www.dwd.de/DE/service/impressum/impressum_node.html"

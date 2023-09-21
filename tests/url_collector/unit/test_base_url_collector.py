@@ -4,7 +4,7 @@ Tests for the BaseUrlCollector class.
 
 import pytest
 
-from src.url_collector.base_url_collector import BaseURLCollector
+from url_collector.base_url_collector import BaseURLCollector
 
 
 def test_constructor():
