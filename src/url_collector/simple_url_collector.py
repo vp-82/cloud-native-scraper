@@ -26,10 +26,13 @@ class SimpleURLCollector(BaseURLCollector):
         self.pending_urls = []
         self.errors = []
         # Load the state on initialization
-        self.state = self.load_state() or {}
+        self.load_state()
 
     def load_state(self):
         """ Loads the state of the collector. """
+        self.state = self.state_adapter.load_state() or {}
+        self.visited_urls = set(self.state.get('visited_urls', []))
+        self.pending_urls = deque(self.state.get('pending_urls', []))
 
     def save_state(self):
         """ Saves the state of the collector. """
@@ -44,7 +47,10 @@ class SimpleURLCollector(BaseURLCollector):
     def collect(self) -> List[str]:
         """ Collects the base URLs from the given source. """
 
-        pending_urls = deque(self.start_urls)  # Use a queue to manage pending URLs
+        if not self.pending_urls:
+            pending_urls = deque(self.start_urls)  # Use a queue to manage pending URLs
+        else:
+            pending_urls = deque(self.pending_urls)  # Use a queue to manage pending URLs
 
         try:
             while pending_urls:  # Continue scraping as long as there are pending URLs
@@ -85,6 +91,7 @@ class SimpleURLCollector(BaseURLCollector):
             # If an error occurs, save the current state
             self.logger.error(f"Error occurred during scraping: {ex}")
             self.errors.append(str(ex))
+            self.pending_urls = list(pending_urls)
             raise  # Re-raise the exception after saving the state
         return list(self.visited_urls)
 
@@ -98,6 +105,7 @@ class SimpleURLCollector(BaseURLCollector):
             if not href or "#" in href:
                 continue
 
+            href = href.split(';jsessionid=')[0]
             absolute_url = urljoin(base_url, href)
             urls.append(absolute_url)
         return urls
