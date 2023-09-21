@@ -40,8 +40,10 @@ def test_collect():
         mock_state_adapter = Mock(spec=AbstractStateAdapter)
         mock_state_adapter.save_state.return_value = None  # Mocked save_state to do nothing
 
-        collector = SimpleURLCollector(base_urls=[BASE_URL], start_urls=[START_URL], state_adapter=mock_state_adapter)
-        urls = collector.collect()
+        with SimpleURLCollector(base_urls=[BASE_URL],
+                                start_urls=[START_URL],
+                                state_adapter=mock_state_adapter) as collector:
+            urls = collector.collect()
         assert len(urls) == 5390
         # assert urls[0] == START_URL
 
@@ -55,12 +57,13 @@ def test_collect_with_exception():
         mock_state_adapter = Mock(spec=AbstractStateAdapter)
         mock_state_adapter.save_state.return_value = None  # Mocked save_state to do nothing
 
-        collector = SimpleURLCollector(base_urls=[BASE_URL],
-                                       start_urls=[START_URL],
-                                       state_adapter=mock_state_adapter)
-        with pytest.raises(Exception):
-            _ = collector.collect()
+        with SimpleURLCollector(base_urls=[BASE_URL],
+                                start_urls=[START_URL],
+                                state_adapter=mock_state_adapter) as collector:
+            with pytest.raises(Exception):
+                _ = collector.collect()
 
+        # Assert that the state was saved
         assert mock_state_adapter.save_state.call_count == 1
 
 
@@ -72,12 +75,12 @@ def test_collect_with_exception_and_state():
         state_adapter = StateAdapterFactory.create(adapter_type='local',
                                                    file_path='tests/url_collector/unit/state.json')
 
-        collector = SimpleURLCollector(base_urls=[BASE_URL],
-                                       start_urls=[START_URL],
-                                       state_adapter=state_adapter)
+        with SimpleURLCollector(base_urls=[BASE_URL],
+                                start_urls=[START_URL],
+                                state_adapter=state_adapter) as collector:
 
-        with pytest.raises(Exception):
-            _ = collector.collect()
+            with pytest.raises(Exception):
+                _ = collector.collect()
 
     assert os.path.exists("tests/url_collector/unit/state.json") is True
     # Read and load the JSON file content

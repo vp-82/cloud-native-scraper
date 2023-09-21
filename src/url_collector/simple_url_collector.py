@@ -87,7 +87,6 @@ class SimpleURLCollector(BaseURLCollector):
             # If an error occurs, save the current state
             self.logger.error(f"Error occurred during scraping: {ex}")
             self.errors.append(str(ex))
-            self.save_state()
             raise  # Re-raise the exception after saving the state
         return all_urls
 
