@@ -43,7 +43,7 @@ def test_collect():
                                 start_urls=[START_URL],
                                 state_adapter=mock_state_adapter) as collector:
             urls = collector.collect()
-        assert len(urls) == 5390
+        assert len(urls) == 55
         # assert urls[0] == START_URL
 
 

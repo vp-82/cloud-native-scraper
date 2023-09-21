@@ -43,7 +43,7 @@ class SimpleURLCollector(BaseURLCollector):
 
     def collect(self) -> List[str]:
         """ Collects the base URLs from the given source. """
-        all_urls = []
+
         pending_urls = deque(self.start_urls)  # Use a queue to manage pending URLs
 
         try:
@@ -78,8 +78,6 @@ class SimpleURLCollector(BaseURLCollector):
                         if url not in self.visited_urls:
                             pending_urls.append(url)
 
-                    all_urls.extend(urls_from_page)
-
                 # Add the start_url to the visited_urls set
                 self.visited_urls.add(start_url)
 
@@ -88,7 +86,7 @@ class SimpleURLCollector(BaseURLCollector):
             self.logger.error(f"Error occurred during scraping: {ex}")
             self.errors.append(str(ex))
             raise  # Re-raise the exception after saving the state
-        return all_urls
+        return list(self.visited_urls)
 
     def extract_urls(self, soup: BeautifulSoup, base_url: str) -> List[str]:
         """ Extracts URLs from the given soup and converts them to absolute URLs. """

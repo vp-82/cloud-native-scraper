@@ -24,5 +24,5 @@ def test_state_adapter_factory():
     state_adapter = StateAdapterFactory.create(
         adapter_type='gcp',
         bucket_name='test-bucket',
-        blob_name='state.json')
+        blob_name='blob-name')
     assert isinstance(state_adapter, GCPStateAdapter)
