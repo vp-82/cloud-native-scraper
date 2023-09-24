@@ -4,6 +4,7 @@ Tests for the SimpleUrlCollector class.
 
 import json
 import os
+import time
 from unittest.mock import Mock, patch
 
 import pytest
@@ -16,6 +17,7 @@ from state_adapter_factory import StateAdapterFactory
 BASE_URL = "https://www.dwd.de/"
 START_URL = "https://www.dwd.de/DE/service/impressum/impressum_node.html"
 TEST_STATE_FILE = "tests/url_collector/unit/state.json"
+BASE_URL_2 = "https://hamel.dev/"
 
 
 @pytest.fixture(name='base_url_rsponse')
@@ -179,3 +181,22 @@ def test_collect_with_error_after_20_iterations_and_resume():
         # Assert that the state was saved
         assert len(data['visited_urls']) == 38
         assert len(data['pending_urls']) > 1
+
+
+def test_with_small_page():
+    """ Test the collect method of the SimpleUrlCollector class with a small page. """
+    state_adapter = StateAdapterFactory.create(adapter_type='local',
+                                               file_path=TEST_STATE_FILE)
+
+    start_time = time.perf_counter()
+
+    with SimpleURLCollector(base_urls=[BASE_URL_2],
+                            start_urls=[BASE_URL_2],
+                            state_adapter=state_adapter) as collector:
+
+        urls = collector.collect()
+
+    end_time = time.perf_counter()
+
+    assert len(urls) > 100
+    assert end_time - start_time < 30.0

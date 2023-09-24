@@ -92,7 +92,8 @@ class SimpleURLCollector(BaseURLCollector):
             self.logger.error(f"Error occurred during scraping: {ex}")
             self.errors.append(str(ex))
             self.pending_urls = list(pending_urls)
-            raise  # Re-raise the exception after saving the state
+            self.save_state()
+            raise ex  # Re-raise the exception after saving the state
         return list(self.visited_urls)
 
     def extract_urls(self, soup: BeautifulSoup, base_url: str) -> List[str]:
@@ -113,5 +114,6 @@ class SimpleURLCollector(BaseURLCollector):
     def __enter__(self):
         return self
 
+    # Save the state when exiting the context only if an exception has not occurred
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.save_state()
+        pass
