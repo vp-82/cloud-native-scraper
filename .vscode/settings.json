@@ -12,7 +12,9 @@
     ],
     "python.envFile": "${workspaceFolder}/.env",
     "python.analysis.extraPaths": [
-        "./src/url_collector"
+        "./src/url_collector",
+        "./tests/url_collector",
+        "./src/app_config"
     ],
     "python.testing.pytestEnabled": true,
     "python.testing.autoTestDiscoverOnSaveEnabled": true,

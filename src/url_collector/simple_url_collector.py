@@ -11,6 +11,8 @@ from base_url_collector import BaseURLCollector
 from bs4 import BeautifulSoup
 from state_adapter import AbstractStateAdapter
 
+logger = logging.getLogger(__name__)
+
 
 class SimpleURLCollector(BaseURLCollector):
     """
@@ -20,7 +22,6 @@ class SimpleURLCollector(BaseURLCollector):
                  start_urls: List[str],
                  state_adapter: AbstractStateAdapter):
         super().__init__(base_urls=base_urls, start_urls=start_urls)
-        self.logger = logging.getLogger(__name__)
         self.state_adapter = state_adapter
         self.visited_urls = set()
         self.pending_urls = []
@@ -34,6 +35,14 @@ class SimpleURLCollector(BaseURLCollector):
         self.visited_urls = set(self.state.get('visited_urls', []))
         self.pending_urls = deque(self.state.get('pending_urls', []))
 
+        log_payload = {
+            "message": "State loaded",
+            "visited_urls_count": len(self.visited_urls),
+            "pending_urls_count": len(self.pending_urls),
+            "errors_count": len(self.errors)
+        }
+        logger.info(log_payload)
+
     def save_state(self):
         """ Saves the state of the collector. """
         state = {
@@ -42,7 +51,14 @@ class SimpleURLCollector(BaseURLCollector):
             'visited_urls': list(self.visited_urls),  # Convert set to list for serialization
         }
         self.state_adapter.save_state(state)
-        self.logger.info(f"State saved with current state: {self.state}")
+
+        log_payload = {
+            "message": "State saved",
+            "visited_urls_count": len(self.visited_urls),
+            "pending_urls_count": len(self.pending_urls),
+            "errors_count": len(self.errors)
+        }
+        logger.info(log_payload)
 
     def collect(self) -> List[str]:
         """ Collects the base URLs from the given source. """
@@ -87,9 +103,15 @@ class SimpleURLCollector(BaseURLCollector):
                 # Add the start_url to the visited_urls set
                 self.visited_urls.add(start_url)
 
+                log_payload = {
+                    "message": "URL added to visited",
+                    "visited_url": start_url
+                }
+                logger.info(log_payload)
+
         except Exception as ex:
             # If an error occurs, save the current state
-            self.logger.error(f"Error occurred during scraping: {ex}")
+            logger.error(f"Error occurred during scraping: {ex}")
             self.errors.append(str(ex))
             self.pending_urls = list(pending_urls)
             self.save_state()
@@ -109,6 +131,14 @@ class SimpleURLCollector(BaseURLCollector):
             href = href.split(';jsessionid=')[0]
             absolute_url = urljoin(base_url, href)
             urls.append(absolute_url)
+
+            log_payload = {
+                "message": "URLs extracted from page",
+                "base_url": base_url,
+                "extracted_urls_count": len(urls)
+            }
+            logger.info(log_payload)
+
         return urls
 
     def __enter__(self):
