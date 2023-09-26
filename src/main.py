@@ -1,8 +1,9 @@
 import logging
 
-from scraper_config import configure_logging
 from simple_url_collector import SimpleURLCollector
 from state_adapter_factory import StateAdapterFactory
+
+from app_config.scraper_config import configure_logging
 
 # Set up the logging configuration
 configure_logging()
@@ -17,7 +18,7 @@ def run_scraper():
         state_adapter = StateAdapterFactory.create(adapter_type='local',
                                                    file_path='state.json')
 
-        collector = SimpleURLCollector(state_adapter=state_adapter, base_urls=['https://www.example.com'], start_urls=['https://www.example.com'])
+        collector = SimpleURLCollector(state_adapter=state_adapter, base_urls=['https://hamel.dev/'], start_urls=['https://hamel.dev/'])
         collected_urls = collector.collect()
         logger.info(f"Scraper finished. Collected {len(collected_urls)} URLs.")
     except Exception as e:

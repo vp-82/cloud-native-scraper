@@ -11,6 +11,8 @@ from base_url_collector import BaseURLCollector
 from bs4 import BeautifulSoup
 from state_adapter import AbstractStateAdapter
 
+from plugin_manager import PluginManager
+
 logger = logging.getLogger(__name__)
 
 
@@ -23,6 +25,7 @@ class SimpleURLCollector(BaseURLCollector):
                  state_adapter: AbstractStateAdapter):
         super().__init__(base_urls=base_urls, start_urls=start_urls)
         self.state_adapter = state_adapter
+        self.plugin_manager = PluginManager()
         self.visited_urls = set()
         self.pending_urls = []
         self.errors = []
@@ -77,6 +80,12 @@ class SimpleURLCollector(BaseURLCollector):
                 if start_url in self.visited_urls:
                     continue
 
+                log_payload = {
+                    "message": "Requesting URL",
+                    "url": start_url
+                }
+                logger.debug(log_payload)
+
                 response = requests.get(start_url, timeout=20)
                 soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -89,6 +98,12 @@ class SimpleURLCollector(BaseURLCollector):
 
                 # If a corresponding base URL is found, extract URLs
                 if corresponding_base_url:
+                    log_payload = {
+                        "message": "Extracting URLs from page",
+                        "url": start_url
+                    }
+                    logger.debug(log_payload)
+
                     urls_from_page = self.extract_urls(soup, corresponding_base_url)
 
                     # Filter URLs to only include those that start with the base_url
@@ -124,6 +139,11 @@ class SimpleURLCollector(BaseURLCollector):
         for link in soup.find_all('a'):
             href = link.get('href')
 
+            # After extracting a URL, use the filter plugin to decide whether to process it
+            url_filter_plugin = self.plugin_manager.url_filter_plugin
+            if url_filter_plugin and not url_filter_plugin.should_collect(href):
+                continue
+
             # Skip if href is None
             if not href or "#" in href:
                 continue
@@ -134,10 +154,10 @@ class SimpleURLCollector(BaseURLCollector):
 
             log_payload = {
                 "message": "URLs extracted from page",
-                "base_url": base_url,
+                "url": absolute_url,
                 "extracted_urls_count": len(urls)
             }
-            logger.info(log_payload)
+            logger.debug(log_payload)
 
         return urls
 
