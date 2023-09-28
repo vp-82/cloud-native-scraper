@@ -5,16 +5,25 @@ import pkg_resources
 
 class PluginManager:
 
-    def __init__(self, config_file="config.json"):
-        with open(config_file, 'r') as f:
-            self.config = json.load(f)
-        self.url_filter_plugin = self._load_plugin("url_filter")
+    @staticmethod
+    def load_active_plugins():
+        # Load the configuration directly within the method
+        with open("config.json", "r") as f:
+            config = json.load(f)
 
-    def _load_plugin(self, plugin_type):
-        plugin_name = self.config.get("active_plugins", {}).get(plugin_type)
-        if not plugin_name:
-            return None
-        for entry_point in pkg_resources.iter_entry_points(f'scraper_plugins.{plugin_type}'):
-            if entry_point.name == plugin_name:
-                return entry_point.load()()
-        return None
+        active_filter_plugins = []
+        active_transform_plugins = []
+
+        # Load and instantiate filter plugins
+        for entry_point in pkg_resources.iter_entry_points('scraper_plugins.url_filter'):
+            if entry_point.name in config["url_filters"]:
+                filter_plugin_class = entry_point.load()
+                active_filter_plugins.append(filter_plugin_class())
+
+        # Load and instantiate transformer plugins
+        for entry_point in pkg_resources.iter_entry_points('scraper_plugins.url_transformer'):
+            if entry_point.name in config["url_transformers"]:
+                transform_plugin_class = entry_point.load()
+                active_transform_plugins.append(transform_plugin_class())
+
+        return active_filter_plugins, active_transform_plugins

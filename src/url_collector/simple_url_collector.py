@@ -26,10 +26,12 @@ class SimpleURLCollector(BaseURLCollector):
         super().__init__(base_urls=base_urls, start_urls=start_urls)
         self.state_adapter = state_adapter
         self.plugin_manager = PluginManager()
+        self.active_filter_plugins = []
+        self.active_transform_plugins = []
+        self.active_filter_plugins, self.active_transform_plugins = PluginManager.load_active_plugins()
         self.visited_urls = set()
         self.pending_urls = []
         self.errors = []
-        # Load the state on initialization
         self.load_state()
 
     def load_state(self):
@@ -139,10 +141,14 @@ class SimpleURLCollector(BaseURLCollector):
         for link in soup.find_all('a'):
             href = link.get('href')
 
-            # After extracting a URL, use the filter plugin to decide whether to process it
-            url_filter_plugin = self.plugin_manager.url_filter_plugin
-            if url_filter_plugin and not url_filter_plugin.should_collect(href):
-                continue
+            # Filtering
+            for filter_plugin in self.active_filter_plugins:
+                if not filter_plugin.should_collect(href):
+                    continue
+
+            # Transformation
+            for transform_plugin in self.active_transform_plugins:
+                href = transform_plugin.transform(href)
 
             # Skip if href is None
             if not href or "#" in href:

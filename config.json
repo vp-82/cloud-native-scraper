@@ -1,5 +1,4 @@
 {
-    "active_plugins": {
-        "url_filter": "SampleFilter"
-    }
+    "url_filters": ["GeneralFilter"],
+    "url_transformers": ["JSessionIDRemover"]
 }

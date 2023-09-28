@@ -9,8 +9,11 @@ setup(
         'beautifulsoup4'
     ],
     entry_points={
-        'console_scripts': [
-            'my_script = my_package.scripts:main_function',
+        'scraper_plugins.url_filter': [
+            'GeneralFilter = general_filter:GeneralFilter',
+        ],
+        'scraper_plugins.url_transformer': [
+            'JSessionIDRemover = jsessionid_transformer:JSessionIDRemover',
         ],
     },
 )
