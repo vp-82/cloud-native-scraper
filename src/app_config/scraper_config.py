@@ -25,14 +25,16 @@ class ScraperConfig:
 
     def setup_logging(self):
         """Set up logging based on run location."""
+        logging_level = self.config['logging']['level']
         if self.run_location == 'gcp':
             # Structured logging for GCP (e.g., for Google Cloud Logging)
             GCP_LOG_FORMAT = '{"severity": "%(levelname)s", "message": "%(message)s", "name": "%(name)s"}'
-            logging.basicConfig(level=logging.getLevelName(self.config['logging_level']), format=GCP_LOG_FORMAT)
+            logging.basicConfig(level=logging.getLevelName(logging_level), format=GCP_LOG_FORMAT)
         else:
             # Human-readable logging for local development
             LOCAL_LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            logging.basicConfig(level=logging.getLevelName(self.config['logging_level']), format=LOCAL_LOG_FORMAT)
+            logging.basicConfig(level=logging.getLevelName(logging_level), format=LOCAL_LOG_FORMAT)
+
 
 # If you want to initialize the config upon import, you can instantiate it here:
 # config = ScraperConfig()
