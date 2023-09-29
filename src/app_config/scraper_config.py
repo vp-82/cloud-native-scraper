@@ -3,44 +3,37 @@ import logging
 import os
 
 
-def detect_gcp():
-    """Detect if we're running on GCP."""
-    return os.environ.get('GAE_INSTANCE') is not None
+class ScraperConfig:
 
-def configure_logging():
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
+    def __init__(self, config_file_path: str = 'config.json'):
+        self.config = self.load_config(config_file_path)
+        self.run_location = self.determine_run_location()
+        self.setup_logging()
 
-    # Formatter for local logging
-    local_formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
+    def load_config(self, config_file_path: str) -> dict:
+        """Load configuration from a JSON file."""
+        with open(config_file_path, 'r') as file:
+            return json.load(file)
 
-    # Formatter for GCP structured logging
-    class GCPJSONFormatter(logging.Formatter):
-        def format(self, record):
-            log_dict = {
-                "severity": record.levelname,
-                "logger": record.name,
-                "message": record.getMessage()
-            }
-            return json.dumps(log_dict)
+    def determine_run_location(self) -> str:
+        """Determine if running on GCP or locally."""
+        # Using GCP_PROJECT_ID as an indicator for GCP environment
+        if os.environ.get('GCP_PROJECT_ID'):
+            return 'gcp'
+        else:
+            return 'local'
 
-    gcp_formatter = GCPJSONFormatter()
+    def setup_logging(self):
+        """Set up logging based on run location."""
+        if self.run_location == 'gcp':
+            # Structured logging for GCP (e.g., for Google Cloud Logging)
+            GCP_LOG_FORMAT = '{"severity": "%(levelname)s", "message": "%(message)s", "name": "%(name)s"}'
+            logging.basicConfig(level=logging.getLevelName(self.config['logging_level']), format=GCP_LOG_FORMAT)
+        else:
+            # Human-readable logging for local development
+            LOCAL_LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            logging.basicConfig(level=logging.getLevelName(self.config['logging_level']), format=LOCAL_LOG_FORMAT)
 
-    if detect_gcp():
-        # GCP logging configuration
-        gcp_handler = logging.StreamHandler()
-        gcp_handler.setFormatter(gcp_formatter)
-        logger.addHandler(gcp_handler)
-    else:
-        # Local logging configuration
-        local_handler = logging.StreamHandler()
-        local_handler.setFormatter(local_formatter)
-        logger.addHandler(local_handler)
-
-        file_handler = logging.FileHandler('app.log')
-        file_handler.setFormatter(local_formatter)
-        logger.addHandler(file_handler)
-
-    return logger
-
-# Additional configurations (like database, API keys, etc.) can be added here in the future.
+# If you want to initialize the config upon import, you can instantiate it here:
+# config = ScraperConfig()
+# This will make the config available to all modules that import it.

@@ -1,4 +1,15 @@
 {
-    "url_filters": ["GeneralFilter"],
-    "url_transformers": ["JSessionIDRemover"]
+    "logging": {
+        "level": "DEBUG"
+    },
+    "plugins": {
+        "active_filters": ["GeneralFilter"],
+        "active_transformers": ["JSessionIdTransformer"]
+    },
+    "gcp": {
+        "project_id": "your_gcp_project_id",
+        "pubsub_topic": "your_pubsub_topic_name",
+        "pubsub_subscription": "your_pubsub_subscription_name",
+        "credentials_path": "path_to_your_service_account_key.json"
+    }
 }

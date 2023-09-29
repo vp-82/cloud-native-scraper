@@ -1,3 +1,4 @@
+# pylint: disable=redefined-outer-name
 """
 Tests for the SimpleUrlCollector class.
 """
@@ -13,6 +14,8 @@ from html_responses import BASEURL_RESPONSE
 from simple_url_collector import SimpleURLCollector
 from state_adapter import AbstractStateAdapter
 from state_adapter_factory import StateAdapterFactory
+
+from app_config.scraper_config import ScraperConfig
 
 BASE_URL = "https://www.dwd.de/"
 START_URL = "https://www.dwd.de/DE/service/impressum/impressum_node.html"
@@ -35,16 +38,25 @@ def cleanup():
         os.remove(TEST_STATE_FILE)
 
 
-def test_constructor():
+@pytest.fixture(scope="module")
+def config():
+    """ Fixture for the ScraperConfig object. """
+    return ScraperConfig()
+
+
+def test_constructor(config):
     """
     Test the constructor of the SimpleUrlCollector class.
     """
     mock_state_adapter = Mock(spec=AbstractStateAdapter)
     mock_state_adapter.load_state.return_value = {}  # Mocked load_state to return an empty dict
-    _ = SimpleURLCollector(base_urls=[BASE_URL], start_urls=[START_URL], state_adapter=mock_state_adapter)
+    _ = SimpleURLCollector(base_urls=[BASE_URL],
+                           start_urls=[START_URL],
+                           state_adapter=mock_state_adapter,
+                           config=config)
 
 
-def test_collect():
+def test_collect(config):
     """ Test the collect method of the SimpleUrlCollector class. """
     with patch('src.url_collector.simple_url_collector.requests.get',
                return_value=Mock(text=BASEURL_RESPONSE)) as _:
@@ -56,13 +68,14 @@ def test_collect():
 
         with SimpleURLCollector(base_urls=[BASE_URL],
                                 start_urls=[START_URL],
-                                state_adapter=mock_state_adapter) as collector:
+                                state_adapter=mock_state_adapter,
+                                config=config) as collector:
             urls = collector.collect()
         assert len(urls) == 55
         # assert urls[0] == START_URL
 
 
-def test_collect_with_exception():
+def test_collect_with_exception(config):
     """ Test the collect method of the SimpleUrlCollector class when an exception occurs. """
     with patch('src.url_collector.simple_url_collector.requests.get',
                side_effect=Exception("HTTP Exception")) as _:  # Mock the requests.get method
@@ -74,7 +87,8 @@ def test_collect_with_exception():
 
         with SimpleURLCollector(base_urls=[BASE_URL],
                                 start_urls=[START_URL],
-                                state_adapter=mock_state_adapter) as collector:
+                                state_adapter=mock_state_adapter,
+                                config=config) as collector:
             with pytest.raises(Exception):
                 _ = collector.collect()
 
@@ -84,7 +98,7 @@ def test_collect_with_exception():
 
 # Use the fixture in your test
 @pytest.mark.usefixtures("cleanup")
-def test_collect_with_exception_and_state():
+def test_collect_with_exception_and_state(config):
     """ Test the collect method of the SimpleUrlCollector class when an exception occurs and state is available. """
     with patch('src.url_collector.simple_url_collector.requests.get',
                side_effect=Exception("HTTP Exception")) as _:  # Mock the requests.get method
@@ -94,7 +108,8 @@ def test_collect_with_exception_and_state():
 
         with SimpleURLCollector(base_urls=[BASE_URL],
                                 start_urls=[START_URL],
-                                state_adapter=state_adapter) as collector:
+                                state_adapter=state_adapter,
+                                config=config) as collector:
 
             with pytest.raises(Exception):
                 _ = collector.collect()
@@ -112,7 +127,7 @@ def test_collect_with_exception_and_state():
 
 # Use the fixture in your test
 @pytest.mark.usefixtures("cleanup")
-def test_collect_with_error_after_20_iterations_and_resume():
+def test_collect_with_error_after_20_iterations_and_resume(config):
     """ Test the collect method of the SimpleUrlCollector class when an error occurs after 20 iterations.
     Resume the collection after the error and stop at iteration 40."""
     # Initialize your SimpleURLCollector object here
@@ -144,7 +159,8 @@ def test_collect_with_error_after_20_iterations_and_resume():
 
             with SimpleURLCollector(base_urls=[BASE_URL],
                                     start_urls=[START_URL],
-                                    state_adapter=state_adapter) as collector:
+                                    state_adapter=state_adapter,
+                                    config=config) as collector:
                 _ = collector.collect()
         except RuntimeError as ex:
             # Verify that the error is raised at iteration 20
@@ -167,7 +183,8 @@ def test_collect_with_error_after_20_iterations_and_resume():
 
             with SimpleURLCollector(base_urls=[BASE_URL],
                                     start_urls=[START_URL],
-                                    state_adapter=state_adapter) as collector:
+                                    state_adapter=state_adapter,
+                                    config=config) as collector:
                 _ = collector.collect()
         except RuntimeError as ex:
             # Verify that the error is raised at iteration 40
@@ -183,7 +200,7 @@ def test_collect_with_error_after_20_iterations_and_resume():
         assert len(data['pending_urls']) > 1
 
 
-def test_with_small_page():
+def test_with_small_page(config):
     """ Test the collect method of the SimpleUrlCollector class with a small page. """
     state_adapter = StateAdapterFactory.create(adapter_type='local',
                                                file_path=TEST_STATE_FILE)
@@ -192,7 +209,8 @@ def test_with_small_page():
 
     with SimpleURLCollector(base_urls=[BASE_URL_2],
                             start_urls=[BASE_URL_2],
-                            state_adapter=state_adapter) as collector:
+                            state_adapter=state_adapter,
+                            config=config) as collector:
 
         urls = collector.collect()
 

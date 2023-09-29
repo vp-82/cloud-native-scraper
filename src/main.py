@@ -3,10 +3,7 @@ import logging
 from simple_url_collector import SimpleURLCollector
 from state_adapter_factory import StateAdapterFactory
 
-from app_config.scraper_config import configure_logging
-
-# Set up the logging configuration
-configure_logging()
+from app_config.scraper_config import ScraperConfig
 
 # Logger instance for this main module
 logger = logging.getLogger(__name__)
@@ -15,10 +12,14 @@ def run_scraper():
     # Assuming SimpleURLCollector is the entry point for the scraper
     try:
 
+        config = ScraperConfig()
+
         state_adapter = StateAdapterFactory.create(adapter_type='local',
                                                    file_path='state.json')
 
-        collector = SimpleURLCollector(state_adapter=state_adapter, base_urls=['https://hamel.dev/'], start_urls=['https://hamel.dev/'])
+        collector = SimpleURLCollector(state_adapter=state_adapter, base_urls=['https://hamel.dev/'],
+                                       start_urls=['https://hamel.dev/'],
+                                       config=config)
         collected_urls = collector.collect()
         logger.info(f"Scraper finished. Collected {len(collected_urls)} URLs.")
     except Exception as e:

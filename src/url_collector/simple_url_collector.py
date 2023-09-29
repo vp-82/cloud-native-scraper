@@ -11,6 +11,7 @@ from base_url_collector import BaseURLCollector
 from bs4 import BeautifulSoup
 from state_adapter import AbstractStateAdapter
 
+from app_config.scraper_config import ScraperConfig
 from plugin_manager import PluginManager
 
 logger = logging.getLogger(__name__)
@@ -22,7 +23,8 @@ class SimpleURLCollector(BaseURLCollector):
     """
     def __init__(self, base_urls: List[str],
                  start_urls: List[str],
-                 state_adapter: AbstractStateAdapter):
+                 state_adapter: AbstractStateAdapter,
+                 config: ScraperConfig):
         super().__init__(base_urls=base_urls, start_urls=start_urls)
         self.state_adapter = state_adapter
         self.plugin_manager = PluginManager()
@@ -32,6 +34,7 @@ class SimpleURLCollector(BaseURLCollector):
         self.visited_urls = set()
         self.pending_urls = []
         self.errors = []
+        self.config = config
         self.load_state()
 
     def load_state(self):
