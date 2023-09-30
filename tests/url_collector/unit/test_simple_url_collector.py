@@ -103,8 +103,8 @@ def test_collect_with_exception_and_state(config):
     with patch('src.url_collector.simple_url_collector.requests.get',
                side_effect=Exception("HTTP Exception")) as _:  # Mock the requests.get method
 
-        state_adapter = StateAdapterFactory.create(adapter_type='local',
-                                                   file_path=TEST_STATE_FILE)
+        factory = StateAdapterFactory(config)
+        state_adapter = factory.create(adapter_type='local', file_path=TEST_STATE_FILE)
 
         with SimpleURLCollector(base_urls=[BASE_URL],
                                 start_urls=[START_URL],
@@ -154,8 +154,8 @@ def test_collect_with_error_after_20_iterations_and_resume(config):
     with patch('requests.get', side_effect=mock_requests_get):
         try:
 
-            state_adapter = StateAdapterFactory.create(adapter_type='local',
-                                                       file_path=TEST_STATE_FILE)
+            factory = StateAdapterFactory(config)
+            state_adapter = factory.create(adapter_type='local', file_path=TEST_STATE_FILE)
 
             with SimpleURLCollector(base_urls=[BASE_URL],
                                     start_urls=[START_URL],
@@ -178,8 +178,8 @@ def test_collect_with_error_after_20_iterations_and_resume(config):
     with patch('requests.get', side_effect=mock_requests_get):
         try:
 
-            state_adapter = StateAdapterFactory.create(adapter_type='local',
-                                                       file_path=TEST_STATE_FILE)
+            factory = StateAdapterFactory(config)
+            state_adapter = factory.create(adapter_type='local', file_path=TEST_STATE_FILE)
 
             with SimpleURLCollector(base_urls=[BASE_URL],
                                     start_urls=[START_URL],
@@ -202,8 +202,8 @@ def test_collect_with_error_after_20_iterations_and_resume(config):
 
 def test_with_small_page(config):
     """ Test the collect method of the SimpleUrlCollector class with a small page. """
-    state_adapter = StateAdapterFactory.create(adapter_type='local',
-                                               file_path=TEST_STATE_FILE)
+    factory = StateAdapterFactory(config)
+    state_adapter = factory.create(adapter_type='local', file_path=TEST_STATE_FILE)
 
     start_time = time.perf_counter()
 

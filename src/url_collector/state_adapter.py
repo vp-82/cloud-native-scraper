@@ -78,15 +78,25 @@ class GCPStateAdapter(AbstractStateAdapter):
 
 
 class FirestoreStateAdapter(AbstractStateAdapter):
-    """ Adapter for saving/loading state from Google Cloud Firestore. """
-
-    def __init__(self, collection_name, document_name):
+    """ Adapter for saving/loading state from Google Cloud Firestore."""
+    def __init__(self, collection_name, document_name, **kwargs):
         self.collection_name = collection_name
         self.document_name = document_name
-        self.db = firestore_v1.Client()  # pylint: disable=invalid-name
+        self.extra_config = kwargs  # Store additional config if needed
+
+        # Extracting configurations for Firestore Client
+        credentials_path = kwargs.get('credentials_path', None)
+        project_id = kwargs.get('project_id', None)
+
+        # Set up the Firestore client
+        self.firestore_db = (
+            firestore_v1.Client.from_service_account_json(credentials_path)
+            if credentials_path
+            else firestore_v1.Client(project=project_id)
+        )
 
     def save_state(self, state):
-        doc_ref = self.db.collection(self.collection_name).document(self.document_name)
+        doc_ref = self.firestore_db.collection(self.collection_name).document(self.document_name)
         doc_ref.set(state)
 
         log_payload = {
@@ -97,7 +107,7 @@ class FirestoreStateAdapter(AbstractStateAdapter):
         logger.info(log_payload)
 
     def load_state(self):
-        doc_ref = self.db.collection(self.collection_name).document(self.document_name)
+        doc_ref = self.firestore_db.collection(self.collection_name).document(self.document_name)
         doc = doc_ref.get()
 
         log_payload = {

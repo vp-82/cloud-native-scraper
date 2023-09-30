@@ -26,3 +26,12 @@ class GCPPubSubPublisherAdapter(AbstractPublisherAdapter):
     def publish(self, message: str):
         """Publish a message to GCP Pub/Sub."""
         self.publisher.publish(self.topic_path, data=message.encode('utf-8'))
+
+
+class LocalPublisherAdapter(AbstractPublisherAdapter):
+    """ Local Publisher Adapter """
+    def __init__(self) -> None:
+        pass
+
+    def publish(self, message: str):
+        raise NotImplementedError("LocalPublisherAdapter is not implemented yet")
