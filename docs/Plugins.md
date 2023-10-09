@@ -8,10 +8,6 @@ This guide explains how to extend the capabilities of the scraper through the pl
 - [Why Plugins?](#why-plugins)
 - [Entry Points](#entry-points)
 - [Plugin Setup](#plugin-setup)
-- [Workflow](#workflow)
-- [Benefits in Context](#benefits-in-context)
-- [Adding a New Plugin](#adding-a-new-plugin)
-- [Adding a New Entry Point](#adding-a-new-entry-point)
 
 ---
 
@@ -29,7 +25,7 @@ In software design, a plugin is a piece of software that adds a specific feature
 
 To enable dynamic loading of plugins, we use "entry points". This is a feature provided by `setuptools`, a Python library for packaging. An entry point is essentially a named pointer to a function or class. Other code can then look up these pointers dynamically (at runtime) and use the functions or classes they point to.
 
-### Code Example:
+### Code Example
 
 ```python
 entry_points={
@@ -48,7 +44,7 @@ entry_points={
 
 Guidelines or contracts that all corresponding plugins must follow.
 
-### Code Example:
+### Code Example (Interface):
 
 ```python
 class URLFilterPlugin:
@@ -62,7 +58,7 @@ class URLFilterPlugin:
 
 Actual plugins that implement these interfaces.
 
-### Code Example:
+### Code Example (Implementation)
 
 ```python
 class GeneralFilter(URLFilterPlugin):
@@ -76,7 +72,7 @@ class GeneralFilter(URLFilterPlugin):
 
 Plugins are registered in the `setup.py` file using entry points, making them discoverable.
 
-### Code Example:
+### Code Example (Registration):
 
 ```python
 entry_points={
@@ -93,7 +89,7 @@ entry_points={
 
 Specify which plugins are active in `config.json`.
 
-### Code Example:
+### Code Example (Configuration)
 
 ```json
 {
@@ -108,7 +104,7 @@ Specify which plugins are active in `config.json`.
 
 `PluginManager` reads the `config.json`, discovers registered plugins via entry points, and loads the active ones.
 
-### Code Example:
+### Code Example (Loading Plugins)
 
 ```python
 def load_active_plugins():
